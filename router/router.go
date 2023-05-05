@@ -48,5 +48,5 @@ func (app *Application) SetupRoutes() {
 }
 
 func (app *Application) Listen(port string) {
-	app.inner.Listen("0.0.0.0" + port)
+	app.inner.Listen("0.0.0.0:" + port)
 }
