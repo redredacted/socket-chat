@@ -41,8 +41,12 @@ func (app *Application) SetupRoutes() {
 			}
 		}
 	}))
+
+	app.inner.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
+	})
 }
 
 func (app *Application) Listen(port string) {
-	app.inner.Listen(port)
+	app.inner.Listen("0.0.0.0" + port)
 }
