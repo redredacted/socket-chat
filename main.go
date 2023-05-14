@@ -7,7 +7,6 @@ import (
 
 func main() {
 	app := router.NewApplication()
-	app.SetupMiddleWare()
-	app.SetupRoutes()
+	app.Setup()
 	app.Listen(os.Getenv("PORT"))
 }

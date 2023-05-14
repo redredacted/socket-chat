@@ -1,52 +1,33 @@
 package router
 
 import (
-	"log"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/redredacted/socket-chat/middleware"
 )
 
 type Application struct {
-	inner *fiber.App
+	router *fiber.App
 }
 
 func NewApplication() *Application {
-	return &Application{inner: fiber.New()}
+	return &Application{router: fiber.New()}
 }
 
-func (app *Application) SetupMiddleWare() {
-	app.inner.Use("/ws", middleware.WsUpgrade)
+func (app *Application) Setup() {
+	app.setupMiddleware()
+	app.setupRoutes()
 }
 
-func (app *Application) SetupRoutes() {
-	app.inner.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
-		var (
-			mt  int
-			msg []byte
-			err error
-		)
+func (app *Application) setupMiddleware() {
+	app.router.Use("/ws", middleware.WsUpgrade)
+}
 
-		for {
-			if mt, msg, err = c.ReadMessage(); err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("rx: %s", msg)
-
-			if err = c.WriteMessage(mt, msg); err != nil {
-				log.Print("tx:", err)
-				break
-			}
-		}
-	}))
-
-	app.inner.Get("/health", func(c *fiber.Ctx) error {
-		return c.SendString("OK")
-	})
+func (app *Application) setupRoutes() {
+	app.router.Get("/ws/:id", websocket.New(socketHandler))
+	app.router.Get("/health", healthCheck)
 }
 
 func (app *Application) Listen(port string) {
-	app.inner.Listen("0.0.0.0:" + port)
+	app.router.Listen("0.0.0.0:" + port)
 }
